@@ -1,12 +1,62 @@
+#include<algorithm>
+#include<cctype>
+#include<ctime>
+#include<fstream>
+#include<iomanip>
+#include<iostream>
+#include<limits>
+#include<queue>
+#include<sstream>
+#include<string>
+#include<vector>
 
+using namespace std;
+struct Vehicle {
+string number;
+string owner;
+long long entryTime=0;
+};
 
+clas ParkingSlot {
+private:
+int slotNumber;
+bool occupied;
+Vehicle vehicle;
 
+public:
+explicit ParkingSlot(int number =0):slotNumber(number),occupied(false),vehicle{} {}
 
+int getSlotNumber() const {return slotNumber;}
+bool isOccupied() const {return occupied;}
+const Vehicle& getVehicle() const{return vehicle;}
 
+void parkVehicle(const Vehicle& v) {
+vehicle = v;
+occupied = true;
+}
 
+Vehicle removeVehicle() {
+Vehicle removed = vehicle;
+vehicle = Vehicle{};
+occupied = false;
+retuen removed ;
+}
+};
 
+class ParkingManager {
+private:
+static constexpr int SLOT_COUNT = 10;
+vector<ParkingSlot>slots;
+queue<Vehicle>waitingQueue;
+const string dataFile = "parking_data.txt";
+const string historyFile="parking_history.txt";
 
-
+static string uperCase(string text) {
+for(char& ch : text) {
+ch=static_cast<char>(toupper(static_cast<unsigned char>(ch)));
+}
+return text;
+}
 
 
 
