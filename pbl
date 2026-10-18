@@ -58,7 +58,67 @@ ch=static_cast<char>(toupper(static_cast<unsigned char>(ch)));
 return text;
 }
 
-
+static string cleanField(string text) {
+ // The file uses | as a field separator.
+ replace(text.begin(), text.end(), '|', '/');
+ return text;
+}
+static string timeString(long long stamp) {
+ if (stamp <= 0) return "Unknown";
+ time_t t = static_cast<time_t>(stamp);
+ tm* local = localtime(&t);
+ if (!local) return "Unknown";
+ ostringstream out;
+ out << put_time(local, "%Y-%m-%d %H:%M:%S");
+ return out.str();
+}
+void logAction(const string& action, const Vehicle&
+v, int slotNumber = 0) const {
+ ofstream file(historyFile, ios::app);
+ if (!file) {
+ cerr << "Warning: could not write to " <<
+historyFile << ".\n";
+ return;
+ }
+ file << timeString(static_cast<long
+long>(time(nullptr))) << " | "
+ << action << " | " << v.number << " | " <<
+v.owner;
+ if (slotNumber > 0) file << " | Slot " <<
+slotNumber;
+ file << '\n';
+}
+int findFreeSlotIndex() const {
+ for (size_t i = 0; i < slots.size(); ++i) {
+ if (!slots[i].isOccupied()) return static_cast<int>(i);
+ }
+ return -1;
+}
+bool existsInParkingOrQueue(const string& number)
+const {
+ for (const auto& slot : slots) {
+ if (slot.isOccupied() && slot.getVehicle().number == number) return true;
+ }
+ queue<Vehicle> copy = waitingQueue;
+ while (!copy.empty()) {
+ if (copy.front().number == number) return true;
+ copy.pop();
+ }
+ return false;
+}
+static int partitionVehicles(vector<Vehicle>& arr,
+int low, int high) {
+ string pivot = arr[high].number;
+ int i = low - 1;
+ for (int j = low; j < high; ++j) {
+ if (arr[j].number <= pivot) {
+++i;
+ swap(arr[i], arr[j]);
+ }
+ }
+ swap(arr[i + 1], arr[high]);
+ return i + 1;
+}
     static void quickSort(vector<Vehicle>& arr, int low, int high) {
         if (low < high) {
             int pivotIndex = partitionVehicles(arr, low, high);
