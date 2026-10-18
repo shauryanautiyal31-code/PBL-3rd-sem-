@@ -243,7 +243,122 @@ public:
              << " / " << slots.size() << '\n';
         cout << "Vehicles waiting: " << waitingQueue.size() << '\n';
     }
-
+void parkVehicle() {
+string number, owner;
+cout << "Enter vehicle registration number: ";
+getline(cin, number);
+number = upperCase(number);
+if (number.empty()) {
+cout << "Vehicle number cannot be empty.\n";
+return;
+}
+if (number.find('|') != string::npos) {
+cout << "Please do not use the | character.\n";
+return;
+}
+if (existsInParkingOrQueue(number)) {
+cout << "This vehicle is already parked or
+waiting.\n";
+return;
+}
+cout << "Enter owner/driver name: ";
+getline(cin, owner);
+owner = cleanField(owner);
+if (owner.empty()) owner = "Not provided";
+Vehicle v{number, owner, static_cast<long
+long>(time(nullptr))};
+int freeIndex = findFreeSlotIndex();
+if (freeIndex >= 0) {
+slots[freeIndex].parkVehicle(v);
+cout << "Vehicle parked successfully in Slot
+"
+<< slots[freeIndex].getSlotNumber() <<
+".\n";
+logAction("PARKED", v, slots[freeIndex].get-
+SlotNumber());
+} else {
+waitingQueue.push(v);
+cout << "Parking is full. Vehicle added to
+the FIFO waiting queue.\n";
+cout << "Queue position: " << waitingQueue.
+size() << '\n';
+logAction("ADDED TO WAITING QUEUE", v);
+}
+saveData();
+}
+void removeVehicle() {
+string number;
+cout << "Enter vehicle registration number to
+remove: ";
+getline(cin, number);
+number = upperCase(number);
+for (auto& slot : slots) {
+if (slot.isOccupied() && slot.getVehicle().number
+== number) {
+Vehicle removed = slot.removeVehicle();
+cout << "Vehicle " << removed.number <<
+" has departed from Slot "
+<< slot.getSlotNumber() << ".\n";
+logAction("DEPARTED", removed,
+slot.getSlotNumber());
+if (!waitingQueue.empty()) {
+Vehicle next = waitingQueue.front();
+waitingQueue.pop();
+next.entryTime = static_cast<long
+long>(time(nullptr));
+slot.parkVehicle(next);
+cout << "Next waiting vehicle " <<
+next.number
+<< " has been allocated Slot "
+<< slot.getSlotNumber() << ".\n";
+logAction("ALLOCATED FROM WAITING
+QUEUE", next, slot.getSlotNumber());
+}
+saveData();
+return;
+}
+}
+cout << "Vehicle not found in the parking area.\n";
+}
+void searchVehicle() const {
+string number;
+cout << "Enter vehicle registration number to
+search: ";
+getline(cin, number);
+number = upperCase(number);
+vector<Vehicle> sorted = parkedVehiclesSorted();
+size_t index = 0;
+if (binarySearchByNumber(sorted, number, index))
+{
+const Vehicle& v = sorted[index];
+int slotNo = 0;
+for (const auto& slot : slots) {
+if (slot.isOccupied() && slot.getVehicle().
+number == number) {
+slotNo = slot.getSlotNumber();
+break;
+}
+}
+cout << "\nVehicle found in parking.\n";
+printVehicle(v, "Parked in Slot " +
+to_string(slotNo));
+return;
+}
+queue<Vehicle> copy = waitingQueue;
+size_t position = 1;
+while (!copy.empty()) {
+if (copy.front().number == number) {
+cout << "\nVehicle found in waiting queue
+(position "
+<< position << ").\n";
+printVehicle(copy.front(), "Waiting");
+return;
+}
+copy.pop();
+++position;
+}
+cout << "No parked or waiting vehicle found with that number.\n";
+}
 
 
 
