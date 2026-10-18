@@ -359,6 +359,115 @@ copy.pop();
 }
 cout << "No parked or waiting vehicle found with that number.\n";
 }
+void displaySortedVehicles() const {
+vector<Vehicle> sorted = parkedVehiclesSorted();
+cout << "\n========== PARKED VEHICLES (SORTED BY
+NUMBER) ==========\n";
+if (sorted.empty()) {
+cout << "No vehicles are currently parked.\n";
+return;
+}
+cout << left << setw(20) << "Vehicle Number"
+<< setw(28) << "Owner/Driver" << "Entry
+Time\n";
+cout << string(75, '-') << '\n';
+for (const auto& v : sorted) {
+cout << left << setw(20) << v.number
+<< setw(28) << v.owner
+<< timeString(v.entryTime) << '\n';
+}
+}
+void displayWaitingQueue() const {
+cout << "\n========== FIFO WAITING QUEUE
+==========\n";
+if (waitingQueue.empty()) {
+cout << "The waiting queue is empty.\n";
+return;
+}
+queue<Vehicle> copy = waitingQueue;
+int position = 1;
+while (!copy.empty()) {
+const Vehicle& v = copy.front();
+cout << position++ << ". " << v.number << "
+| " << v.owner
+<< " | Requested: " << timeString(v.en-
+tryTime) << '\n';
+copy.pop();
+}
+}
+void displayHistory() const {
+ifstream file(historyFile);
+cout << "\n========== PARKING HISTORY
+==========\n";
+if (!file) {
+cout << "No history file found yet. Actions
+will be recorded as you use the system.\n";
+return;
+}
+string line;
+bool any = false;
+while (getline(file, line)) {
+cout << line << '\n';
+any = true;
+}
+if (!any) cout << "No history records avail-
+able.\n";
+}
+void run() {
+int choice = -1;
+do {
+cout <<
+"\n============================================\n"
+<< " SMART PARKING MANAGEMENT
+SYSTEM\n"
+<<
+"============================================\n"
+<< "1. View parking slot status\n"
+<< "2. Park a vehicle\n"
+<< "3. Remove/depart a vehicle\n"
+<< "4. Search vehicle by registration
+number\n"
+<< "5. Display parked vehicles (sorted)\n"
+<< "6. View FIFO waiting queue\n"
+<< "7. View parking history\n"
+<< "0. Save and exit\n"
+<< "Enter your choice: ";
+if (!(cin >> choice)) {
+cin.clear();
+cin.ignore(numeric_lim-
+its<streamsize>::max(), '\n');
+cout << "Invalid input. Please enter a
+menu number.\n";
+continue;
+}
+cin.ignore(numeric_limits<streamsize>::max(),
+'\n');
+switch (choice) {
+case 1: displaySlots(); break;
+case 2: parkVehicle(); break;
+case 3: removeVehicle(); break;
+case 4: searchVehicle(); break;
+case 5: displaySortedVehicles(); break;
+case 6: displayWaitingQueue(); break;
+case 7: displayHistory(); break;
+case 0:
+saveData();
+cout << "Parking data saved. Goodbye!\n";
+break;
+default:
+cout << "Invalid choice. Please select
+an option from the menu.\n";
+}
+} while (choice != 0);
+}
+};
+int main() {
+ParkingManager manager;
+cout << "Welcome! Saved parking records have been loaded if
+available.\n";
+manager.run();
+return 0;
+}
 
 
 
