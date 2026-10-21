@@ -419,7 +419,8 @@ able.\n";
 }
 void run() {
 int choice = -1;
-do {
+do 
+{
 cout <<"\n============================================\n"
 << " SMART PARKING MANAGEMENT SYSTEM\n"
 <<"============================================\n"
