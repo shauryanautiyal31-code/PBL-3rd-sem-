@@ -458,7 +458,8 @@ default:
 cout << "Invalid choice. Please select
 an option from the menu.\n";
 }
-} while (choice != 0);
+} 
+while (choice != 0);
 }
 };
 int main() {
