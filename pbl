@@ -436,12 +436,10 @@ if (!(cin >> choice)) {
 cin.clear();
 cin.ignore(numeric_lim-
 its<streamsize>::max(), '\n');
-cout << "Invalid input. Please enter a
-menu number.\n";
+cout << "Invalid input. Please enter a menu number.\n";
 continue;
 }
-cin.ignore(numeric_limits<streamsize>::max(),
-'\n');
+cin.ignore(numeric_limits<streamsize>::max(),'\n');
 switch (choice) {
 case 1: displaySlots(); break;
 case 2: parkVehicle(); break;
