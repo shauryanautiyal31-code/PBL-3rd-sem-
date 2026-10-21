@@ -382,7 +382,8 @@ cout << left << setw(20) << v.number
 void displayWaitingQueue() const {
 cout << "\n========== FIFO WAITING QUEUE
 ==========\n";
-if (waitingQueue.empty()) {
+if (waitingQueue.empty()) 
+{
 cout << "The waiting queue is empty.\n";
 return;
 }
@@ -397,7 +398,8 @@ tryTime) << '\n';
 copy.pop();
 }
 }
-void displayHistory() const {
+void displayHistory() const 
+{
 ifstream file(historyFile);
 cout << "\n========== PARKING HISTORY
 ==========\n";
