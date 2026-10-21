@@ -141,7 +141,6 @@ private:
         while (!copy.empty()) {
             if (copy.front().number == number)
                 return true;
-
             copy.pop();
         }
 
