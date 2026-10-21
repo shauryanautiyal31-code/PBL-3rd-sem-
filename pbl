@@ -464,8 +464,7 @@ while (choice != 0);
 int main() 
 {
 ParkingManager manager;
-cout << "Welcome! Saved parking records have been loaded if
-available.\n";
+cout << "Welcome! Saved parking records have been loaded if available.\n";
 manager.run();
 return 0;
 }
