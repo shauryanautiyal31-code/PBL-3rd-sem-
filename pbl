@@ -270,7 +270,8 @@ if (owner.empty()) owner = "Not provided";
 Vehicle v{number, owner, static_cast<long
 long>(time(nullptr))};
 int freeIndex = findFreeSlotIndex();
-if (freeIndex >= 0) {
+if (freeIndex >= 0) 
+{
 slots[freeIndex].parkVehicle(v);
 cout << "Vehicle parked successfully in Slot
 "
@@ -278,7 +279,8 @@ cout << "Vehicle parked successfully in Slot
 ".\n";
 logAction("PARKED", v, slots[freeIndex].get-
 SlotNumber());
-} else {
+}
+else {
 waitingQueue.push(v);
 cout << "Parking is full. Vehicle added to
 the FIFO waiting queue.\n";
@@ -363,8 +365,7 @@ cout << "No parked or waiting vehicle found with that number.\n";
 }
 void displaySortedVehicles() const {
 vector<Vehicle> sorted = parkedVehiclesSorted();
-cout << "\n========== PARKED VEHICLES (SORTED BY
-NUMBER) ==========\n";
+cout << "\n========== PARKED VEHICLES (SORTED BY NUMBER) ==========\n";
 if (sorted.empty()) {
 cout << "No vehicles are currently parked.\n";
 return;
@@ -379,9 +380,8 @@ cout << left << setw(20) << v.number
 << timeString(v.entryTime) << '\n';
 }
 }
-void displayWaitingQueue() const {
-cout << "\n========== FIFO WAITING QUEUE
-==========\n";
+void displayWaitingQueue() 
+const {cout << "\n========== FIFO WAITING QUEUE ==========\n";
 if (waitingQueue.empty()) 
 {
 cout << "The waiting queue is empty.\n";
@@ -420,17 +420,13 @@ able.\n";
 void run() {
 int choice = -1;
 do {
-cout <<
-"\n============================================\n"
-<< " SMART PARKING MANAGEMENT
-SYSTEM\n"
-<<
-"============================================\n"
+cout <<"\n============================================\n"
+<< " SMART PARKING MANAGEMENT SYSTEM\n"
+<<"============================================\n"
 << "1. View parking slot status\n"
 << "2. Park a vehicle\n"
 << "3. Remove/depart a vehicle\n"
-<< "4. Search vehicle by registration
-number\n"
+<< "4. Search vehicle by registration number\n"
 << "5. Display parked vehicles (sorted)\n"
 << "6. View FIFO waiting queue\n"
 << "7. View parking history\n"
