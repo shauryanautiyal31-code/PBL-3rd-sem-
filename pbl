@@ -65,6 +65,7 @@ static string cleanField(string text) {
  replace(text.begin(), text.end(), '|', '/');
  return text;
 }
+
 static string timeString(long long stamp) {
  if (stamp <= 0) return "Unknown";
  time_t t = static_cast<time_t>(stamp);
