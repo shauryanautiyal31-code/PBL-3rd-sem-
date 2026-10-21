@@ -1,130 +1,182 @@
-#include<algorithm>
-#include<cctype>
-#include<ctime>
-#include<fstream>
-#include<iomanip>
-#include<iostream>
-#include<limits>
-#include<queue>
-#include<sstream>
-#include<string>
-#include<vector>
+#include <algorithm>
+#include <cctype>
+#include <ctime>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <queue>
+#include <sstream>
+#include <string>
+#include <vector>
 
 using namespace std;
-struct Vehicle 
-{
-string number;
-string owner;
-long long entryTime=0;
+
+struct Vehicle {
+    string number;
+    string owner;
+    long long entryTime = 0;
 };
 
-clas ParkingSlot 
-{
+class ParkingSlot {
 private:
-int slotNumber;
-bool occupied;
-Vehicle vehicle;
+    int slotNumber;
+    bool occupied;
+    Vehicle vehicle;
 
 public:
-explicit ParkingSlot(int number =0):slotNumber(number),occupied(false),vehicle{} {}
+    explicit ParkingSlot(int number = 0)
+        : slotNumber(number), occupied(false), vehicle{} {}
 
-int getSlotNumber() const {return slotNumber;}
-bool isOccupied() const {return occupied;}
-const Vehicle& getVehicle() const{return vehicle;}
+    int getSlotNumber() const {
+        return slotNumber;
+    }
 
-void parkVehicle(const Vehicle& v) {
-vehicle = v;
-occupied = true;
-}
+    bool isOccupied() const {
+        return occupied;
+    }
 
-Vehicle removeVehicle() {
-Vehicle removed = vehicle;
-vehicle = Vehicle{};
-occupied = false;
-retuen removed ;
-}
+    const Vehicle& getVehicle() const {
+        return vehicle;
+    }
+
+    void parkVehicle(const Vehicle& v) {
+        vehicle = v;
+        occupied = true;
+    }
+
+    Vehicle removeVehicle() {
+        Vehicle removed = vehicle;
+        vehicle = Vehicle{};
+        occupied = false;
+        return removed;
+    }
 };
 
 class ParkingManager {
 private:
-static constexpr int SLOT_COUNT = 10;
-vector<ParkingSlot>slots;
-queue<Vehicle>waitingQueue;
-const string dataFile = "parking_data.txt";
-const string historyFile="parking_history.txt";
+    static constexpr int SLOT_COUNT = 10;
 
-static string uperCase(string text) {
-for(char& ch : text) {
-ch=static_cast<char>(toupper(static_cast<unsigned char>(ch)));
-}
-return text;
-}
+    vector<ParkingSlot> slots;
+    queue<Vehicle> waitingQueue;
 
-static string cleanField(string text) {
- // The file uses | as a field separator.
- replace(text.begin(), text.end(), '|', '/');
- return text;
-}
+    const string dataFile = "parking_data.txt";
+    const string historyFile = "parking_history.txt";
 
-static string timeString(long long stamp) {
- if (stamp <= 0) return "Unknown";
- time_t t = static_cast<time_t>(stamp);
- tm* local = localtime(&t);
- if (!local) return "Unknown";
- ostringstream out;
- out << put_time(local, "%Y-%m-%d %H:%M:%S");
- return out.str();
-}
-void logAction(const string& action, const Vehicle&
-v, int slotNumber = 0) const {
- ofstream file(historyFile, ios::app);
- if (!file) {
- cerr << "Warning: could not write to " <<
-historyFile << ".\n";
- return;
- }
- file << timeString(static_cast<long
-long>(time(nullptr))) << " | "
- << action << " | " << v.number << " | " <<
-v.owner;
- if (slotNumber > 0) file << " | Slot " <<
-slotNumber;
- file << '\n';
-}
-int findFreeSlotIndex() const {
- for (size_t i = 0; i < slots.size(); ++i) {
- if (!slots[i].isOccupied()) return static_cast<int>(i);
- }
- return -1;
-}
-bool existsInParkingOrQueue(const string& number)
-const {
- for (const auto& slot : slots) {
- if (slot.isOccupied() && slot.getVehicle().number == number) return true;
- }
- queue<Vehicle> copy = waitingQueue;
- while (!copy.empty()) {
- if (copy.front().number == number) return true;
- copy.pop();
- }
- return false;
-}
-static int partitionVehicles(vector<Vehicle>& arr,
-int low, int high) {
- string pivot = arr[high].number;
- int i = low - 1;
- for (int j = low; j < high; ++j) {
- if (arr[j].number <= pivot) {
-++i;
- swap(arr[i], arr[j]);
- }
- }
- swap(arr[i + 1], arr[high]);
- return i + 1;
-}
-    static void quickSort(vector<Vehicle>& arr, int low, int high) {
+    static string upperCase(string text) {
+        for (char& ch : text) {
+            ch = static_cast<char>(
+                toupper(static_cast<unsigned char>(ch))
+            );
+        }
+        return text;
+    }
+
+    static string cleanField(string text) {
+        replace(text.begin(), text.end(), '|', '/');
+        return text;
+    }
+
+    static string timeString(long long stamp) {
+        if (stamp <= 0)
+            return "Unknown";
+
+        time_t t = static_cast<time_t>(stamp);
+        tm* local = localtime(&t);
+
+        if (!local)
+            return "Unknown";
+
+        ostringstream out;
+        out << put_time(local, "%Y-%m-%d %H:%M:%S");
+        return out.str();
+    }
+
+    void logAction(
+        const string& action,
+        const Vehicle& v,
+        int slotNumber = 0
+    ) const {
+        ofstream file(historyFile, ios::app);
+
+        if (!file) {
+            cerr << "Warning: could not write to "
+                 << historyFile << ".\n";
+            return;
+        }
+
+        file << timeString(
+                    static_cast<long long>(time(nullptr))
+                )
+             << " | " << action
+             << " | " << v.number
+             << " | " << v.owner;
+
+        if (slotNumber > 0)
+            file << " | Slot " << slotNumber;
+
+        file << '\n';
+    }
+
+    int findFreeSlotIndex() const {
+        for (size_t i = 0; i < slots.size(); ++i) {
+            if (!slots[i].isOccupied())
+                return static_cast<int>(i);
+        }
+
+        return -1;
+    }
+
+    bool existsInParkingOrQueue(
+        const string& number
+    ) const {
+        for (const auto& slot : slots) {
+            if (slot.isOccupied() &&
+                slot.getVehicle().number == number) {
+                return true;
+            }
+        }
+
+        queue<Vehicle> copy = waitingQueue;
+
+        while (!copy.empty()) {
+            if (copy.front().number == number)
+                return true;
+
+            copy.pop();
+        }
+
+        return false;
+    }
+
+    static int partitionVehicles(
+        vector<Vehicle>& arr,
+        int low,
+        int high
+    ) {
+        string pivot = arr[high].number;
+        int i = low - 1;
+
+        for (int j = low; j < high; ++j) {
+            if (arr[j].number <= pivot) {
+                ++i;
+                swap(arr[i], arr[j]);
+            }
+        }
+
+        swap(arr[i + 1], arr[high]);
+        return i + 1;
+    }
+
+    static void quickSort(
+        vector<Vehicle>& arr,
+        int low,
+        int high
+    ) {
         if (low < high) {
-            int pivotIndex = partitionVehicles(arr, low, high);
+            int pivotIndex =
+                partitionVehicles(arr, low, high);
+
             quickSort(arr, low, pivotIndex - 1);
             quickSort(arr, pivotIndex + 1, high);
         }
@@ -132,26 +184,38 @@ int low, int high) {
 
     vector<Vehicle> parkedVehiclesSorted() const {
         vector<Vehicle> result;
+
         for (const auto& slot : slots) {
-            if (slot.isOccupied()) result.push_back(slot.getVehicle());
+            if (slot.isOccupied())
+                result.push_back(slot.getVehicle());
         }
+
         if (!result.empty()) {
-            quickSort(result, 0, static_cast<int>(result.size()) - 1);
+            quickSort(
+                result,
+                0,
+                static_cast<int>(result.size()) - 1
+            );
         }
+
         return result;
     }
 
     void saveData() const {
         ofstream file(dataFile);
+
         if (!file) {
-            cerr << "Error: could not save data to " << dataFile << ".\n";
+            cerr << "Error: could not save data to "
+                 << dataFile << ".\n";
             return;
         }
 
         for (const auto& slot : slots) {
             if (slot.isOccupied()) {
                 const Vehicle& v = slot.getVehicle();
-                file << "PARKED|" << slot.getSlotNumber() << '|'
+
+                file << "PARKED|"
+                     << slot.getSlotNumber() << '|'
                      << cleanField(v.number) << '|'
                      << cleanField(v.owner) << '|'
                      << v.entryTime << '\n';
@@ -159,22 +223,32 @@ int low, int high) {
         }
 
         queue<Vehicle> copy = waitingQueue;
+
         while (!copy.empty()) {
             const Vehicle v = copy.front();
             copy.pop();
-            file << "WAITING|0|" << cleanField(v.number) << '|'
-                 << cleanField(v.owner) << '|' << v.entryTime << '\n';
+
+            file << "WAITING|0|"
+                 << cleanField(v.number) << '|'
+                 << cleanField(v.owner) << '|'
+                 << v.entryTime << '\n';
         }
     }
 
     void loadData() {
         ifstream file(dataFile);
-        if (!file) return; // First run: no saved data yet.
+
+        if (!file)
+            return;
 
         string line;
+
         while (getline(file, line)) {
             stringstream ss(line);
-            string type, slotText, number, owner, timeText;
+
+            string type, slotText, number;
+            string owner, timeText;
+
             if (!getline(ss, type, '|') ||
                 !getline(ss, slotText, '|') ||
                 !getline(ss, number, '|') ||
@@ -185,299 +259,428 @@ int low, int high) {
 
             try {
                 long long stamp = stoll(timeText);
-                Vehicle v{upperCase(number), owner, stamp};
+
+                Vehicle v{
+                    upperCase(number),
+                    owner,
+                    stamp
+                };
 
                 if (type == "PARKED") {
                     int slotNo = stoi(slotText);
-                    if (slotNo >= 1 && slotNo <= static_cast<int>(slots.size()) &&
+
+                    if (slotNo >= 1 &&
+                        slotNo <= static_cast<int>(slots.size()) &&
                         !slots[slotNo - 1].isOccupied()) {
                         slots[slotNo - 1].parkVehicle(v);
                     }
-                } else if (type == "WAITING") {
+                }
+                else if (type == "WAITING") {
                     waitingQueue.push(v);
                 }
-            } catch (...) {
-                // Ignore malformed records so one bad line won't stop startup.
+            }
+            catch (...) {
+                continue;
             }
         }
     }
 
-    static bool binarySearchByNumber(const vector<Vehicle>& sorted, const string& number,
-                                     size_t& foundIndex) {
-        size_t left = 0, right = sorted.size();
+    static bool binarySearchByNumber(
+        const vector<Vehicle>& sorted,
+        const string& number,
+        size_t& foundIndex
+    ) {
+        size_t left = 0;
+        size_t right = sorted.size();
+
         while (left < right) {
             size_t mid = left + (right - left) / 2;
+
             if (sorted[mid].number == number) {
                 foundIndex = mid;
                 return true;
             }
-            if (sorted[mid].number < number) left = mid + 1;
-            else right = mid;
+
+            if (sorted[mid].number < number)
+                left = mid + 1;
+            else
+                right = mid;
         }
+
         return false;
     }
 
-    void printVehicle(const Vehicle& v, const string& status) const {
+    void printVehicle(
+        const Vehicle& v,
+        const string& status
+    ) const {
         cout << "Vehicle number : " << v.number << '\n'
              << "Owner name     : " << v.owner << '\n'
-             << "Entry time     : " << timeString(v.entryTime) << '\n'
+             << "Entry time     : "
+             << timeString(v.entryTime) << '\n'
              << "Status         : " << status << '\n';
     }
 
 public:
     ParkingManager() {
-        for (int i = 1; i <= SLOT_COUNT; ++i) slots.emplace_back(i);
+        for (int i = 1; i <= SLOT_COUNT; ++i)
+            slots.emplace_back(i);
+
         loadData();
     }
 
     void displaySlots() const {
         cout << "\n========== PARKING SLOT STATUS ==========\n";
+
         int available = 0;
+
         for (const auto& slot : slots) {
-            cout << "Slot " << setw(2) << slot.getSlotNumber() << " : ";
+            cout << "Slot " << setw(2)
+                 << slot.getSlotNumber() << " : ";
+
             if (slot.isOccupied()) {
-                cout << "OCCUPIED (" << slot.getVehicle().number << ")\n";
-            } else {
+                cout << "OCCUPIED ("
+                     << slot.getVehicle().number << ")\n";
+            }
+            else {
                 cout << "AVAILABLE\n";
                 ++available;
             }
         }
-        cout << "Available slots: " << available
-             << " / " << slots.size() << '\n';
-        cout << "Vehicles waiting: " << waitingQueue.size() << '\n';
+
+        cout << "Available slots: "
+             << available << " / " << slots.size() << '\n';
+
+        cout << "Vehicles waiting: "
+             << waitingQueue.size() << '\n';
     }
-void parkVehicle() {
-string number, owner;
-cout << "Enter vehicle registration number: ";
-getline(cin, number);
-number = upperCase(number);
-if (number.empty()) {
-cout << "Vehicle number cannot be empty.\n";
-return;
-}
-if (number.find('|') != string::npos) {
-cout << "Please do not use the | character.\n";
-return;
-}
-if (existsInParkingOrQueue(number)) {
-cout << "This vehicle is already parked or
-waiting.\n";
-return;
-}
-cout << "Enter owner/driver name: ";
-getline(cin, owner);
-owner = cleanField(owner);
-if (owner.empty()) owner = "Not provided";
-Vehicle v{number, owner, static_cast<long
-long>(time(nullptr))};
-int freeIndex = findFreeSlotIndex();
-if (freeIndex >= 0) 
-{
-slots[freeIndex].parkVehicle(v);
-cout << "Vehicle parked successfully in Slot
-"
-<< slots[freeIndex].getSlotNumber() <<
-".\n";
-logAction("PARKED", v, slots[freeIndex].get-
-SlotNumber());
-}
-else {
-waitingQueue.push(v);
-cout << "Parking is full. Vehicle added to
-the FIFO waiting queue.\n";
-cout << "Queue position: " << waitingQueue.
-size() << '\n';
-logAction("ADDED TO WAITING QUEUE", v);
-}
-saveData();
-}
-void removeVehicle() {
-string number;
-cout << "Enter vehicle registration number to
-remove: ";
-getline(cin, number);
-number = upperCase(number);
-for (auto& slot : slots) {
-if (slot.isOccupied() && slot.getVehicle().number
-== number) {
-Vehicle removed = slot.removeVehicle();
-cout << "Vehicle " << removed.number <<
-" has departed from Slot "
-<< slot.getSlotNumber() << ".\n";
-logAction("DEPARTED", removed,
-slot.getSlotNumber());
-if (!waitingQueue.empty()) {
-Vehicle next = waitingQueue.front();
-waitingQueue.pop();
-next.entryTime = static_cast<long
-long>(time(nullptr));
-slot.parkVehicle(next);
-cout << "Next waiting vehicle " <<
-next.number
-<< " has been allocated Slot "
-<< slot.getSlotNumber() << ".\n";
-logAction("ALLOCATED FROM WAITING
-QUEUE", next, slot.getSlotNumber());
-}
-saveData();
-return;
-}
-}
-cout << "Vehicle not found in the parking area.\n";
-}
-void searchVehicle() const {
-string number;
-cout << "Enter vehicle registration number to
-search: ";
-getline(cin, number);
-number = upperCase(number);
-vector<Vehicle> sorted = parkedVehiclesSorted();
-size_t index = 0;
-if (binarySearchByNumber(sorted, number, index))
-{
-const Vehicle& v = sorted[index];
-int slotNo = 0;
-for (const auto& slot : slots) {
-if (slot.isOccupied() && slot.getVehicle().
-number == number) {
-slotNo = slot.getSlotNumber();
-break;
-}
-}
-cout << "\nVehicle found in parking.\n";
-printVehicle(v, "Parked in Slot " +
-to_string(slotNo));
-return;
-}
-queue<Vehicle> copy = waitingQueue;
-size_t position = 1;
-while (!copy.empty()) {
-if (copy.front().number == number) {
-cout << "\nVehicle found in waiting queue
-(position "
-<< position << ").\n";
-printVehicle(copy.front(), "Waiting");
-return;
-}
-copy.pop();
-++position;
-}
-cout << "No parked or waiting vehicle found with that number.\n";
-}
-void displaySortedVehicles() const {
-vector<Vehicle> sorted = parkedVehiclesSorted();
-cout << "\n========== PARKED VEHICLES (SORTED BY NUMBER) ==========\n";
-if (sorted.empty()) {
-cout << "No vehicles are currently parked.\n";
-return;
-}
-cout << left << setw(20) << "Vehicle Number"
-<< setw(28) << "Owner/Driver" << "Entry
-Time\n";
-cout << string(75, '-') << '\n';
-for (const auto& v : sorted) {
-cout << left << setw(20) << v.number
-<< setw(28) << v.owner
-<< timeString(v.entryTime) << '\n';
-}
-}
-void displayWaitingQueue() 
-const {cout << "\n========== FIFO WAITING QUEUE ==========\n";
-if (waitingQueue.empty()) 
-{
-cout << "The waiting queue is empty.\n";
-return;
-}
-queue<Vehicle> copy = waitingQueue;
-int position = 1;
-while (!copy.empty()) {
-const Vehicle& v = copy.front();
-cout << position++ << ". " << v.number << "
-| " << v.owner
-<< " | Requested: " << timeString(v.en-
-tryTime) << '\n';
-copy.pop();
-}
-}
-void displayHistory() const 
-{
-ifstream file(historyFile);
-cout << "\n========== PARKING HISTORY
-==========\n";
-if (!file) {
-cout << "No history file found yet. Actions
-will be recorded as you use the system.\n";
-return;
-}
-string line;
-bool any = false;
-while (getline(file, line)) {
-cout << line << '\n';
-any = true;
-}
-if (!any) cout << "No history records avail-
-able.\n";
-}
-void run() {
-int choice = -1;
-do 
-{
-cout <<"\n============================================\n"
-<< " SMART PARKING MANAGEMENT SYSTEM\n"
-<<"============================================\n"
-<< "1. View parking slot status\n"
-<< "2. Park a vehicle\n"
-<< "3. Remove/depart a vehicle\n"
-<< "4. Search vehicle by registration number\n"
-<< "5. Display parked vehicles (sorted)\n"
-<< "6. View FIFO waiting queue\n"
-<< "7. View parking history\n"
-<< "0. Save and exit\n"
-<< "Enter your choice: ";
-if (!(cin >> choice)) {
-cin.clear();
-cin.ignore(numeric_lim-
-its<streamsize>::max(), '\n');
-cout << "Invalid input. Please enter a menu number.\n";
-continue;
-}
-cin.ignore(numeric_limits<streamsize>::max(),'\n');
-switch (choice) {
-case 1: displaySlots(); break;
-case 2: parkVehicle(); break;
-case 3: removeVehicle(); break;
-case 4: searchVehicle(); break;
-case 5: displaySortedVehicles(); break;
-case 6: displayWaitingQueue(); break;
-case 7: displayHistory(); break;
-case 0:
-saveData();
-cout << "Parking data saved. Goodbye!\n";
-break;
-default:
-cout << "Invalid choice. Please select
-an option from the menu.\n";
-}
-} 
-while (choice != 0);
-}
+
+    void parkVehicle() {
+        string number, owner;
+
+        cout << "Enter vehicle registration number: ";
+        getline(cin, number);
+
+        number = upperCase(number);
+
+        if (number.empty()) {
+            cout << "Vehicle number cannot be empty.\n";
+            return;
+        }
+
+        if (number.find('|') != string::npos) {
+            cout << "Please do not use the | character.\n";
+            return;
+        }
+
+        if (existsInParkingOrQueue(number)) {
+            cout << "This vehicle is already parked or waiting.\n";
+            return;
+        }
+
+        cout << "Enter owner/driver name: ";
+        getline(cin, owner);
+
+        owner = cleanField(owner);
+
+        if (owner.empty())
+            owner = "Not provided";
+
+        Vehicle v{
+            number,
+            owner,
+            static_cast<long long>(time(nullptr))
+        };
+
+        int freeIndex = findFreeSlotIndex();
+
+        if (freeIndex >= 0) {
+            slots[freeIndex].parkVehicle(v);
+
+            cout << "Vehicle parked successfully in Slot "
+                 << slots[freeIndex].getSlotNumber()
+                 << ".\n";
+
+            logAction(
+                "PARKED",
+                v,
+                slots[freeIndex].getSlotNumber()
+            );
+        }
+        else {
+            waitingQueue.push(v);
+
+            cout << "Parking is full. Vehicle added to "
+                 << "the FIFO waiting queue.\n";
+
+            cout << "Queue position: "
+                 << waitingQueue.size() << '\n';
+
+            logAction("ADDED TO WAITING QUEUE", v);
+        }
+
+        saveData();
+    }
+
+    void removeVehicle() {
+        string number;
+
+        cout << "Enter vehicle registration number to remove: ";
+        getline(cin, number);
+
+        number = upperCase(number);
+
+        for (auto& slot : slots) {
+            if (slot.isOccupied() &&
+                slot.getVehicle().number == number) {
+
+                Vehicle removed = slot.removeVehicle();
+
+                cout << "Vehicle " << removed.number
+                     << " has departed from Slot "
+                     << slot.getSlotNumber() << ".\n";
+
+                logAction(
+                    "DEPARTED",
+                    removed,
+                    slot.getSlotNumber()
+                );
+
+                if (!waitingQueue.empty()) {
+                    Vehicle next = waitingQueue.front();
+                    waitingQueue.pop();
+
+                    next.entryTime =
+                        static_cast<long long>(time(nullptr));
+
+                    slot.parkVehicle(next);
+
+                    cout << "Next waiting vehicle "
+                         << next.number
+                         << " has been allocated Slot "
+                         << slot.getSlotNumber() << ".\n";
+
+                    logAction(
+                        "ALLOCATED FROM WAITING QUEUE",
+                        next,
+                        slot.getSlotNumber()
+                    );
+                }
+
+                saveData();
+                return;
+            }
+        }
+
+        cout << "Vehicle not found in the parking area.\n";
+    }
+
+    void searchVehicle() const {
+        string number;
+
+        cout << "Enter vehicle registration number to search: ";
+        getline(cin, number);
+
+        number = upperCase(number);
+
+        vector<Vehicle> sorted = parkedVehiclesSorted();
+        size_t index = 0;
+
+        if (binarySearchByNumber(sorted, number, index)) {
+            const Vehicle& v = sorted[index];
+            int slotNo = 0;
+
+            for (const auto& slot : slots) {
+                if (slot.isOccupied() &&
+                    slot.getVehicle().number == number) {
+                    slotNo = slot.getSlotNumber();
+                    break;
+                }
+            }
+
+            cout << "\nVehicle found in parking.\n";
+
+            printVehicle(
+                v,
+                "Parked in Slot " + to_string(slotNo)
+            );
+
+            return;
+        }
+
+        queue<Vehicle> copy = waitingQueue;
+        size_t position = 1;
+
+        while (!copy.empty()) {
+            if (copy.front().number == number) {
+                cout << "\nVehicle found in waiting queue "
+                     << "(position " << position << ").\n";
+
+                printVehicle(copy.front(), "Waiting");
+                return;
+            }
+
+            copy.pop();
+            ++position;
+        }
+
+        cout << "No parked or waiting vehicle found with "
+             << "that number.\n";
+    }
+
+    void displaySortedVehicles() const {
+        vector<Vehicle> sorted = parkedVehiclesSorted();
+
+        cout << "\n========== PARKED VEHICLES "
+             << "(SORTED BY NUMBER) ==========\n";
+
+        if (sorted.empty()) {
+            cout << "No vehicles are currently parked.\n";
+            return;
+        }
+
+        cout << left << setw(20) << "Vehicle Number"
+             << setw(28) << "Owner/Driver"
+             << "Entry Time\n";
+
+        cout << string(75, '-') << '\n';
+
+        for (const auto& v : sorted) {
+            cout << left << setw(20) << v.number
+                 << setw(28) << v.owner
+                 << timeString(v.entryTime) << '\n';
+        }
+    }
+
+    void displayWaitingQueue() const {
+        cout << "\n========== FIFO WAITING QUEUE ==========\n";
+
+        if (waitingQueue.empty()) {
+            cout << "The waiting queue is empty.\n";
+            return;
+        }
+
+        queue<Vehicle> copy = waitingQueue;
+        int position = 1;
+
+        while (!copy.empty()) {
+            const Vehicle& v = copy.front();
+
+            cout << position++ << ". "
+                 << v.number << " | "
+                 << v.owner << " | Requested: "
+                 << timeString(v.entryTime) << '\n';
+
+            copy.pop();
+        }
+    }
+
+    void displayHistory() const {
+        ifstream file(historyFile);
+
+        cout << "\n========== PARKING HISTORY ==========\n";
+
+        if (!file) {
+            cout << "No history file found yet. Actions "
+                 << "will be recorded as you use the system.\n";
+            return;
+        }
+
+        string line;
+        bool any = false;
+
+        while (getline(file, line)) {
+            cout << line << '\n';
+            any = true;
+        }
+
+        if (!any)
+            cout << "No history records available.\n";
+    }
+
+    void run() {
+        int choice = -1;
+
+        do {
+            cout << "\n============================================\n"
+                 << "        SMART PARKING MANAGEMENT SYSTEM\n"
+                 << "============================================\n"
+                 << "1. View parking slot status\n"
+                 << "2. Park a vehicle\n"
+                 << "3. Remove/depart a vehicle\n"
+                 << "4. Search vehicle by registration number\n"
+                 << "5. Display parked vehicles (sorted)\n"
+                 << "6. View FIFO waiting queue\n"
+                 << "7. View parking history\n"
+                 << "0. Save and exit\n"
+                 << "Enter your choice: ";
+
+            if (!(cin >> choice)) {
+                cin.clear();
+                cin.ignore(
+                    numeric_limits<streamsize>::max(),
+                    '\n'
+                );
+
+                cout << "Invalid input. Please enter a menu number.\n";
+                continue;
+            }
+
+            cin.ignore(
+                numeric_limits<streamsize>::max(),
+                '\n'
+            );
+
+            switch (choice) {
+                case 1:
+                    displaySlots();
+                    break;
+
+                case 2:
+                    parkVehicle();
+                    break;
+
+                case 3:
+                    removeVehicle();
+                    break;
+
+                case 4:
+                    searchVehicle();
+                    break;
+
+                case 5:
+                    displaySortedVehicles();
+                    break;
+
+                case 6:
+                    displayWaitingQueue();
+                    break;
+
+                case 7:
+                    displayHistory();
+                    break;
+
+                case 0:
+                    saveData();
+                    cout << "Parking data saved. Goodbye!\n";
+                    break;
+
+                default:
+                    cout << "Invalid choice. Please select "
+                         << "an option from the menu.\n";
+            }
+
+        } while (choice != 0);
+    }
 };
-int main() 
-{
-ParkingManager manager;
-cout << "Welcome! Saved parking records have been loaded if available.\n";
-manager.run();
-return 0;
+
+int main() {
+    ParkingManager manager;
+
+    cout << "Welcome! Saved parking records have been "
+         << "loaded if available.\n";
+
+    manager.run();
+
+    return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
