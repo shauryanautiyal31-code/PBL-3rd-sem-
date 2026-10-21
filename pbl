@@ -462,7 +462,8 @@ an option from the menu.\n";
 while (choice != 0);
 }
 };
-int main() {
+int main() 
+{
 ParkingManager manager;
 cout << "Welcome! Saved parking records have been loaded if
 available.\n";
