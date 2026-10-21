@@ -116,7 +116,6 @@ private:
 
         file << '\n';
     }
-
     int findFreeSlotIndex() const {
         for (size_t i = 0; i < slots.size(); ++i) {
             if (!slots[i].isOccupied())
