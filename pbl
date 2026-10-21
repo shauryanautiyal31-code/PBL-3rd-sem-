@@ -71,7 +71,6 @@ private:
         }
         return text;
     }
-
     static string cleanField(string text) {
         replace(text.begin(), text.end(), '|', '/');
         return text;
